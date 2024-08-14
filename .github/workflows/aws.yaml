@@ -25,16 +25,13 @@ jobs:
              
         -  name: deploy cct_workflow_test function
            run: |
-            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-              FUNCTION_NAME=${{secrets.PROD_FUNCTION_NAME}}
-            elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
               FUNCTION_NAME=${{secrets.DEV_FUNCTION_NAME}}
-            fi
+            
 
-            aws lambda update-function-code \
-            --function-name $FUNCTION_NAME \
-            --zip-file fileb://app/lambda.zip \
-            --publish
+              aws lambda update-function-code \
+              --function-name $FUNCTION_NAME \
+              --zip-file fileb://app/lambda.zip \
+              --publish
 
            
              
