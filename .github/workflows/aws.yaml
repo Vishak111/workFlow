@@ -26,10 +26,10 @@ jobs:
         -  name: deploy cct_workflow_test function
            run: |
                if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-                FUNCTION_NAME=${{ secrets.AWS_PROD_CCT_WORKFLOW_TEST}}
+                FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME}}
                 DESCRIPTION="Production deployment"
                elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-                FUNCTION_NAME=${{ secrets.AWS_DEV_CCT_WORKFLOW_TEST}}
+                FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME}}
                 DESCRIPTION="Development deployment"
                fi
             
