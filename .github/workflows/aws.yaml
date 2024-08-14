@@ -25,7 +25,7 @@ jobs:
              
         -  name: deploy cct_workflow_test function
            run: |
-              FUNCTION_NAME=${{secrets.DEV_FUNCTION_NAME}}
+              FUNCTION_NAME=${{secrets.AWS_DEV_FUNCTION_NAME}}
             
 
               aws lambda update-function-code \
