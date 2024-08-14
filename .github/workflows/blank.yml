@@ -1,0 +1,44 @@
+name: Delpoy hello.py into cct_workflow
+on:
+  push:
+    branches:
+      - dev
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest 
+    steps:
+        -  name: Checkout Code
+           uses: actions/checkout@v4
+
+        - name: Configure aws credentials
+          uses: aws-actions/configure-aws-credentials@v4.0.2
+          with: 
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ secrets.AWS_REGION }}
+              
+        -  name: create deployment package for  cct_workflow_test function
+           run: |
+             cd app
+             zip -r9 lambda.zip .
+             
+        -  name: deploy cct_workflow_test function
+           run: |
+            if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+              FUNCTION_NAME=${{secrets.PROD_FUNCTION_NAME}}
+            elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+              FUNCTION_NAME=${{secrets.DEV_FUNCTION_NAME}}
+            fi
+
+            aws lambda update-function-code \
+            --function-name $FUNCTION_NAME \
+            --zip-file fileb://app/lambda.zip \
+            --publish
+
+           
+             
+             
+
+          
+      
