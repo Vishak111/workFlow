@@ -55,15 +55,11 @@ jobs:
           function_deploy
           # Retry logic with longer delay
           for i in {1..5}; do
-            function_deploy && break || (echo "Retrying..."; sleep 30)
+            function_deploy && break || (echo "Retrying..."; sleep 10)
           done
 
-      - name: Check Lambda function status
-        run: |
-          aws lambda get-function --function-name "$FUNCTION_NAME"
-
-      - name: Wait for 60 seconds (Optional)
-        run: sleep 60
+      - name: Wait for 10 seconds (Optional)
+        run: sleep 10
 
       - name: Update function configuration with description
         run: |
@@ -75,6 +71,6 @@ jobs:
           function_update
           # Retry logic with longer delay
           for i in {1..5}; do
-            function_update && break || (echo "Retrying..."; sleep 30)
+            function_update && break || (echo "Retrying..."; sleep 10)
           done
 
