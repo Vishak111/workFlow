@@ -59,6 +59,6 @@ jobs:
           function_update
           # Retry logic with longer delay
           for i in {1..5}; do
-            function_update && break || (echo "Retrying..."; sleep 5)
+            function_update && break || (echo "Retrying...";)
           done
 
