@@ -39,7 +39,7 @@ jobs:
           fi
           echo "Function name set to: $FUNCTION_NAME"
 
-      - name: Deploy Lambda function
+      - name: Deploy Lambda function code
         run: |
           function_deploy() {
             aws lambda update-function-code \
@@ -52,6 +52,13 @@ jobs:
           for i in {1..5}; do
             function_deploy && break || (echo "Retrying..."; sleep 60)
           done
+
+      - name: Check Lambda function status
+        run: |
+          aws lambda get-function --function-name "$FUNCTION_NAME"
+
+      - name: Wait for 60 seconds (Optional)
+        run: sleep 60
 
       - name: Update function configuration with description
         run: |
