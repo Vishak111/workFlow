@@ -45,10 +45,10 @@ jobs:
           function_deploy
           # Retry logic with longer delay
           for i in {1..5}; do
-            function_deploy && break || (echo "Retrying..."; sleep 5)
+            function_deploy && break || (echo "Retrying...";)
           done
-      - name: Wait for 5 seconds (Optional)
-        run: sleep 5
+      # - name: Wait for 5 seconds (Optional)
+      #   run: sleep 5
       - name: Update function configuration with description
         run: |
           function_update() {
