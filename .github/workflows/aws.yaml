@@ -1,4 +1,5 @@
 name: Deploy hello.py into cct_workflow
+
 on:
   workflow_dispatch:
     inputs:
@@ -35,19 +36,20 @@ jobs:
             FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}
             ENVIRONMENT="Development"
           else
-            echo "This workflow only supports deployments on dev and main branches."
+            echo "Error: This workflow only supports deployments on dev and main branches."
             exit 1
           fi
 
+          echo "Deploying to $ENVIRONMENT environment..."
+
           aws lambda update-function-code \
-          --function-name "$FUNCTION_NAME" \
-          --zip-file fileb://app/lambda.zip \
-          --publish \
-          --cli-input-json "$(cat <<EOF
+            --function-name "$FUNCTION_NAME" \
+            --zip-file fileb://app/lambda.zip \
+            --publish \
+            --cli-input-json "$(cat <<EOF
             {
               "Description": "${{ inputs.description }}"
             }
-            EOF
-            )"
+
 
           echo "Deployment to $ENVIRONMENT completed successfully."
