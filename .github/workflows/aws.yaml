@@ -1,47 +1,49 @@
-name: Delpoy hello.py into cct_workflow
+name: Deploy hello.py into cct_workflow
 on:
-  push:
-    branches:
-      - dev
-      - main
+
+  workflow_dispatch:
+    inputs:
+      description:
+        description: 'Commit message'
+        default: 'New commit'
+        required: true
+
+
 jobs:  
+
   deploy:
     runs-on: ubuntu-latest 
     steps:
-        -  name: Checkout Code
-           uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-        - name: Configure aws credentials
-          uses: aws-actions/configure-aws-credentials@v4.0.2
-          with: 
-              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              aws-region: ${{ secrets.AWS_REGION }}
-              
-        -  name: create deployment package for  cct_workflow_test function
-           run: |
-             cd app
-             zip -r9 lambda.zip .
-             
-        -  name: deploy cct_workflow_test function
-           run: |
-               if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-                FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME}}
-                DESCRIPTION="Production deployment"
-               elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-                FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME}}
-                DESCRIPTION="Development deployment"
-               fi
-            
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with: 
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-               aws lambda update-function-code \
-               --function-name $FUNCTION_NAME \
-               --zip-file fileb://app/lambda.zip \
-               --publish
+      - name: Create deployment package for cct_workflow_test function
+        run: |
+          cd app
+          zip -r9 lambda.zip .
 
-           
-             
-             
+      - name: Deploy cct_workflow_test function
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME }}
+            ENVIRONMENT="Production"
+          elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+            FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}
+            ENVIRONMENT="Development"
+          else
+            echo "This workflow only supports deployments on dev and main branches."
+            exit 1
+          fi
 
-          
-      
+          aws lambda update-function-code \
+            --function-name $FUNCTION_NAME \
+            --zip-file fileb://app/lambda.zip \
+            --publish \
+            --description "${{ github.event.inputs.description }} - $ENVIRONMENT"
