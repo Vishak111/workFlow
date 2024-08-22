@@ -1,5 +1,7 @@
 name: Deploy hello.py into cct_workflow
 
+
+
 on:
   workflow_dispatch:
     inputs:
@@ -22,34 +24,57 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Create deployment package for cct_workflow_test function
+      - name: Create deployment package for Lambda function
         run: |
           cd app
           zip -r9 lambda.zip .
 
-      - name: Deploy cct_workflow_test function
+      - name: Determine function name
+        id: determine_function_name
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME }}
-            ENVIRONMENT="Production"
+            echo "FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME }}" >> $GITHUB_ENV
           elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-            FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}
-            ENVIRONMENT="Development"
+            echo "FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}" >> $GITHUB_ENV
           else
             echo "Error: This workflow only supports deployments on dev and main branches."
             exit 1
           fi
+          echo "Function name set to: $FUNCTION_NAME"
 
-          echo "Deploying to $ENVIRONMENT environment..."
 
-          aws lambda update-function-code \
+
+      - name: Deploy Lambda function code
+        run: |
+          function_deploy() {
+            aws lambda update-function-code \
             --function-name "$FUNCTION_NAME" \
             --zip-file fileb://app/lambda.zip \
-            --publish \
-            --cli-input-json "$(cat <<EOF
-            {
-              "Description": "${{ inputs.description }}"
-            })
+            --publish
+          }
+          function_deploy
+          # Retry logic with longer delay
+          for i in {1..5}; do
+            function_deploy && break || (echo "Retrying..."; sleep 60)
+          done
 
+      - name: Check Lambda function status
+        run: |
+          aws lambda get-function --function-name "$FUNCTION_NAME"
 
-          echo "Deployment to $ENVIRONMENT completed successfully."
+      - name: Wait for 60 seconds (Optional)
+        run: sleep 60
+
+      - name: Update function configuration with description
+        run: |
+          function_update() {
+            aws lambda update-function-configuration \
+            --function-name "$FUNCTION_NAME" \
+            --description "${{ github.event.inputs.description }}"
+          }
+          function_update
+          # Retry logic with longer delay
+          for i in {1..5}; do
+            function_update && break || (echo "Retrying..."; sleep 60)
+          done
+
