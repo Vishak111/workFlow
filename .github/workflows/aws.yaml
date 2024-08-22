@@ -1,6 +1,11 @@
 name: Delpoy hello.py into cct_workflow
 on:
-  push:
+  workflow_dispatch:
+    inputs:
+      name:
+      description: 'Commit message'
+      default: 'New commit'
+      required: true
     branches:
       - dev
       - main
@@ -27,17 +32,15 @@ jobs:
            run: |
                if [ "${{ github.ref }}" == "refs/heads/main" ]; then
                 FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME}}
-                DESCRIPTION="Production deployment"
                elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-                FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME}}
-                DESCRIPTION="Development deployment"
+                FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME}}                
                fi
-            
-
+               
                aws lambda update-function-code \
                --function-name $FUNCTION_NAME \
                --zip-file fileb://app/lambda.zip \
                --publish
+               --description "${{ github.event.inputs.description }} - $ENVIRONMENT"
 
            
              
