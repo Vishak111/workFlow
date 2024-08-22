@@ -21,34 +21,33 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Create deployment package for cct_workflow_test function
+      - name: Create deployment package for Lambda function
         run: |
           cd app
           zip -r9 lambda.zip .
 
-      - name: Deploy cct_workflow_test function
+      - name: Determine function name
+        id: determine_function_name
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME }}
-            ENVIRONMENT="Production"
+            echo "FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME }}" >> $GITHUB_ENV
           elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-            FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}
-            ENVIRONMENT="Development"
+            echo "FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}" >> $GITHUB_ENV
           else
             echo "This workflow only supports deployments on dev and main branches."
             exit 1
           fi
+          echo "Function name set to: $FUNCTION_NAME"
 
+      - name: Deploy Lambda function
+        run: |
           aws lambda update-function-code \
           --function-name "$FUNCTION_NAME" \
           --zip-file fileb://app/lambda.zip \
-          --publish \
-          
+          --publish
+
+      - name: Update function configuration with description
+        run: |
           aws lambda update-function-configuration \
           --function-name "$FUNCTION_NAME" \
           --description "${{ github.event.inputs.description }}"
-          
-      
-         
-  
-          
