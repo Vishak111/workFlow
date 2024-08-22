@@ -40,7 +40,14 @@ jobs:
           fi
 
           aws lambda update-function-code \
-            --function-name $FUNCTION_NAME \
-            --zip-file fileb://app/lambda.zip \
-            --publish \
-            --description "${{ inputs.description }}"
+          --function-name "$FUNCTION_NAME" \
+          --zip-file fileb://app/lambda.zip \
+          --publish \
+          --cli-input-json "$(cat <<EOF
+            {
+              "Description": "${{ inputs.description }}"
+            }
+            EOF
+            )"
+
+          echo "Deployment to $ENVIRONMENT completed successfully."
