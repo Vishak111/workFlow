@@ -43,5 +43,5 @@ jobs:
             --function-name $FUNCTION_NAME \
             --zip-file fileb://app/lambda.zip \
             --publish \
-            --description '${{ github.event.inputs.description }}'
+            --description "${{ inputs.description }}"
             
