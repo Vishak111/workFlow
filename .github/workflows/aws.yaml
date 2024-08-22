@@ -1,4 +1,7 @@
 name: Deploy hello.py into cct_workflow
+
+
+
 on:
   workflow_dispatch:
     inputs:
@@ -34,10 +37,12 @@ jobs:
           elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
             echo "FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}" >> $GITHUB_ENV
           else
-            echo "This workflow only supports deployments on dev and main branches."
+            echo "Error: This workflow only supports deployments on dev and main branches."
             exit 1
           fi
           echo "Function name set to: $FUNCTION_NAME"
+
+
 
       - name: Deploy Lambda function code
         run: |
@@ -72,3 +77,4 @@ jobs:
           for i in {1..5}; do
             function_update && break || (echo "Retrying..."; sleep 60)
           done
+
