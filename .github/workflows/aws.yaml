@@ -41,13 +41,27 @@ jobs:
 
       - name: Deploy Lambda function
         run: |
-          aws lambda update-function-code \
-          --function-name "$FUNCTION_NAME" \
-          --zip-file fileb://app/lambda.zip \
-          --publish
+          function_deploy() {
+            aws lambda update-function-code \
+            --function-name "$FUNCTION_NAME" \
+            --zip-file fileb://app/lambda.zip \
+            --publish
+          }
+          function_deploy
+          # Retry logic
+          for i in {1..3}; do
+            function_deploy && break || sleep 30
+          done
 
       - name: Update function configuration with description
         run: |
-          aws lambda update-function-configuration \
-          --function-name "$FUNCTION_NAME" \
-          --description "${{ github.event.inputs.description }}"
+          function_update() {
+            aws lambda update-function-configuration \
+            --function-name "$FUNCTION_NAME" \
+            --description "${{ github.event.inputs.description }}"
+          }
+          function_update
+          # Retry logic
+          for i in {1..3}; do
+            function_update && break || sleep 30
+          done
