@@ -49,7 +49,7 @@ jobs:
             --cli-input-json "$(cat <<EOF
             {
               "Description": "${{ inputs.description }}"
-            }
+            })
 
 
           echo "Deployment to $ENVIRONMENT completed successfully."
