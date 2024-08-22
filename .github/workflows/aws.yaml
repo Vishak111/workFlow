@@ -43,5 +43,11 @@ jobs:
           --function-name "$FUNCTION_NAME" \
           --zip-file fileb://app/lambda.zip \
           --publish \
+          
+      - name: Update function configuration with description
+        run: |
+          aws lambda update-function-configuration \
+          --function-name "$FUNCTION_NAME" \
           --description "${{ github.event.inputs.description }}"
+  
           
