@@ -37,13 +37,10 @@ jobs:
           elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
             FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}
             ENVIRONMENT="Development"
-          else
-            echo "This workflow only supports deployments on dev and main branches."
-            exit 1
           fi
 
           aws lambda update-function-code \
             --function-name $FUNCTION_NAME \
             --zip-file fileb://app/lambda.zip \
             --publish \
-            --description "\"${{ github.event.inputs.description }} - $ENVIRONMENT\""
+            
