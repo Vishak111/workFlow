@@ -55,7 +55,7 @@ jobs:
           function_deploy
           # Retry logic with longer delay
           for i in {1..5}; do
-            function_deploy && break || (echo "Retrying..."; sleep 60)
+            function_deploy && break || (echo "Retrying..."; sleep 30)
           done
 
       - name: Check Lambda function status
@@ -75,6 +75,6 @@ jobs:
           function_update
           # Retry logic with longer delay
           for i in {1..5}; do
-            function_update && break || (echo "Retrying..."; sleep 60)
+            function_update && break || (echo "Retrying..."; sleep 30)
           done
 
