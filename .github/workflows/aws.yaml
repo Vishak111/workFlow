@@ -1,34 +1,27 @@
 name: Deploy hello.py into cct_workflow
-
-
-
 on:
   workflow_dispatch:
     inputs:
       description:
-        description: 'Commit message'
-        default: 'New commit'
+        description: 'Add your description'
+        default: ''
         required: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4.0.2   
         with: 
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
       - name: Create deployment package for Lambda function
         run: |
           cd app
           zip -r9 lambda.zip .
-
       - name: Determine function name
         id: determine_function_name
         run: |
@@ -41,9 +34,6 @@ jobs:
             exit 1
           fi
           echo "Function name set to: $FUNCTION_NAME"
-
-
-
       - name: Deploy Lambda function code
         run: |
           function_deploy() {
@@ -55,12 +45,10 @@ jobs:
           function_deploy
           # Retry logic with longer delay
           for i in {1..5}; do
-            function_deploy && break || (echo "Retrying..."; sleep 10)
+            function_deploy && break || (echo "Retrying..."; sleep 5)
           done
-
-      - name: Wait for 10 seconds (Optional)
-        run: sleep 10
-
+      - name: Wait for 5 seconds (Optional)
+        run: sleep 5
       - name: Update function configuration with description
         run: |
           function_update() {
@@ -71,6 +59,6 @@ jobs:
           function_update
           # Retry logic with longer delay
           for i in {1..5}; do
-            function_update && break || (echo "Retrying..."; sleep 10)
+            function_update && break || (echo "Retrying..."; sleep 5)
           done
 
