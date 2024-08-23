@@ -51,7 +51,7 @@ jobs:
           done
           echo "Deployment successful with Status: $STATUS!"
       - name: Wait for 10 seconds (Optional)
-        run: sleep 10
+        run: sleep 5
       - name: Update function configuration with description
         run: |
           function_update() {
