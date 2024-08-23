@@ -57,10 +57,13 @@ jobs:
             aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
             --description "${{ github.event.inputs.description }}"
+              STATUS=$?
+              echo "Status: $STATUS"
           }
-          function_update
-          # Retry logic with longer delay
-          for i in {1..5}; do
-            function_update && break || (echo "Retrying..."; )
+          function_update   
+          while[$STATUS -ne 0]; do
+            function_update
           done
+          echo "Deployment successful with status: $STATUS"
+          
 
