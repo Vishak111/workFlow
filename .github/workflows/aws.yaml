@@ -46,9 +46,14 @@ jobs:
           STATUS=$?
           echo "Initial Status: $STATUS"
           # Retry logic with longer delay
-          for i in {1..10}; do
-            function_deploy && break || (echo "Initial Status: $STATUS";)
+          while [ $STATUS -ne 0 ]; do
+            echo "Deployment failed, retrying..."
+            sleep 10  # Adjust the sleep time as needed
+            function_deploy
+            STATUS=$?
+            echo "Retry Status: $STATUS"
           done
+          echo "Deployment successful with Status: $STATUS!"
       - name: Wait for 10 seconds (Optional)
         run: sleep 10
       - name: Update function configuration with description
