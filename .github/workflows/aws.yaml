@@ -61,7 +61,7 @@ jobs:
               echo "Status: $STATUS"
           }
           function_update   
-          while[$STATUS -ne 0]; do
+          while[ $STATUS -ne 0 ]; do
             function_update
           done
           echo "Deployment successful with status: $STATUS"
