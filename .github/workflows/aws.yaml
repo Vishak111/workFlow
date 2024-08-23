@@ -46,6 +46,7 @@ jobs:
           }
           function_deploy        
           while [ $STATUS -ne 0 ]; do
+            echo "failed once"
             function_deploy   
           done
           echo "Deployment successful with Status: $STATUS!"
