@@ -46,7 +46,7 @@ jobs:
           STATUS=$?
           echo "Initial Status: $STATUS"
           # Retry logic with longer delay
-          for i in {1..5}; do
+          for i in {1..10}; do
             function_deploy && break || (echo "Initial Status: $STATUS";)
           done
       - name: Wait for 10 seconds (Optional)
