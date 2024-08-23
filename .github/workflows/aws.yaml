@@ -49,8 +49,8 @@ jobs:
             function_deploy   
           done
           echo "Deployment successful with Status: $STATUS!"
-      # - name: Wait for 10 seconds (Optional)
-      #   run: sleep 10
+      - name: Wait for 10 seconds (Optional)
+        run: sleep 10
       - name: Update function configuration with description
         run: |
           function_update() {
@@ -61,9 +61,7 @@ jobs:
               echo "Status: $STATUS"
           }
           function_update   
-          while [ $STATUS -ne 0 ]; do
-            function_update
-          done
+        
           echo "Deployment successful with status: $STATUS"
           
 
