@@ -41,14 +41,14 @@ jobs:
             --function-name "$FUNCTION_NAME" \
             --zip-file fileb://app/lambda.zip \
             --publish
+              STATUS=$?
+              echo "Retry Status: $STATUS"
           }
           function_deploy
           STATUS=$?
           echo "Initial Status: $STATUS"          
           while [ $STATUS -ne 0 ]; do
-            function_deploy
-            STATUS=$?
-            echo "Retry Status: $STATUS"
+            function_deploy   
           done
           echo "Deployment successful with Status: $STATUS!"
       - name: Wait for 10 seconds (Optional)
