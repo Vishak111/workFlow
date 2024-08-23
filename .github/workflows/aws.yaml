@@ -43,6 +43,8 @@ jobs:
             --publish
           }
           function_deploy
+          STATUS=$?
+          echo "Initial Status: $STATUS"
           # Retry logic with longer delay
           for i in {1..5}; do
             function_deploy && break || (echo "Retrying...";)
