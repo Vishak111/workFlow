@@ -26,9 +26,9 @@ jobs:
         id: determine_function_name
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-           echo "FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME }}" >> $GITHUB_ENV
+            echo "FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME }}" >> $GITHUB_ENV
           elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-           echo "FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}" >> $GITHUB_ENV
+            echo "FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}" >> $GITHUB_ENV
           else
             echo "Error: This workflow only supports deployments on dev and main branches."
             exit 1
@@ -41,24 +41,26 @@ jobs:
             --function-name "$FUNCTION_NAME" \
             --zip-file fileb://app/lambda.zip \
             --publish
+              STATUS=$?
+              echo "Status: $STATUS"
           }
-          function_deploy
-          # Retry logic with longer delay
-          for i in {1..5}; do
-            function_deploy && break || (echo "Retrying...";)
+          function_deploy        
+          while [ $STATUS -ne 0 ]; do
+            echo "failed once"
+            function_deploy   
           done
-      # - name: Wait for 5 seconds (Optional)
-      #   run: sleep 5
+          echo "Deployment successful with Status: $STATUS!"
+      - name: Wait for 10 seconds (Optional)
+        run: sleep 10
       - name: Update function configuration with description
         run: |
           function_update() {
             aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
             --description "${{ github.event.inputs.description }}"
+              STATUS=$?
+              echo "Status: $STATUS"
           }
-          function_update
-          # Retry logic with longer delay
-          for i in {1..5}; do
-            function_update && break || (echo "Retrying...";)
-          done
-
+          function_update   
+        
+          echo "Deployment successful with status: $STATUS"
