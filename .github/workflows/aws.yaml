@@ -6,34 +6,49 @@ on:
         description: 'Add your description'
         default: ''
         required: true
+
 jobs:
   deploy:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4.0.2   
-        with: 
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Configure AWS credentials based on branch
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "Using production AWS credentials"
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+          elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+            echo "Using development AWS credentials"
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
+          else
+            echo "Error: This workflow only supports deployments on dev and main branches."
+            exit 1
+          fi
+
       - name: Create deployment package for Lambda function
         run: |
           cd app
           zip -r9 lambda.zip .
+
       - name: Determine function name
         id: determine_function_name
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            echo "FUNCTION_NAME=${{ secrets.AWS_PROD_FUNCTION_NAME }}" >> $GITHUB_ENV
+            echo "FUNCTION_NAME=${{ secrets.AWS_FUNCTION_NAME }}" >> $GITHUB_ENV
           elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-            echo "FUNCTION_NAME=${{ secrets.AWS_DEV_FUNCTION_NAME }}" >> $GITHUB_ENV
+            echo "FUNCTION_NAME=${{ secrets.AWS_FUNCTION_NAME }}" >> $GITHUB_ENV
           else
             echo "Error: This workflow only supports deployments on dev and main branches."
             exit 1
           fi
           echo "Function name set to: $FUNCTION_NAME"
+
       - name: Deploy Lambda function code
         run: |
           function_deploy() {
@@ -50,8 +65,10 @@ jobs:
             function_deploy   
           done
           echo "Deployment successful with Status: $STATUS!"
+
       - name: Wait for 10 seconds (Optional)
         run: sleep 10
+
       - name: Update function configuration with description
         run: |
           function_update() {
@@ -62,5 +79,5 @@ jobs:
               echo "Status: $STATUS"
           }
           function_update   
-        
+
           echo "Deployment successful with status: $STATUS"
