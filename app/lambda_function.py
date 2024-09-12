@@ -1,5 +1,8 @@
-def workFlow():
+import json
+
+def lambda_handler(event, context):
+    # TODO implement
     return {
-        "status": 200,
-        "message": "Success"
+        'statusCode': 200,
+        'body': json.dumps('Hello from prod!')
     }
