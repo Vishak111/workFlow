@@ -1,6 +1,5 @@
-print("hello")
-print("deployment1")
-print("dev deployment1")
-print("dev deployment2")
-print("dev deployment3")
-print("dev deployment100")
+def demo():
+    return {
+        "status": 200,
+        "message": "Success"
+    }
