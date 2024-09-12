@@ -40,10 +40,10 @@ jobs:
         id: determine_function_name
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            echo("entered main")
+            echo "entered main"
             echo "FUNCTION_NAME=${{ secrets.AWS_FUNCTION_NAME }}" >> $GITHUB_ENV
           elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-            echo("entered dev")
+            echo "entered dev"
             echo "FUNCTION_NAME=${{ secrets.AWS_FUNCTION_NAME }}" >> $GITHUB_ENV
           else
             echo "Error: This workflow only supports deployments on dev and main branches."
