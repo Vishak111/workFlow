@@ -12,25 +12,28 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4.0.2   
-        with:
-           run: |
-               if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-                 aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                 aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                 aws-region: ${{ secrets.AWS_REGION }}
-                 echo "push from main"
-               elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
-                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                  aws-region: ${{ secrets.AWS_REGION }}
-                  echo "push from development"
-  
+
+      - name: Configure AWS credentials for main or dev
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "Using production AWS credentials"
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_PROD_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_PROD_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "AWS_REGION=${{ secrets.AWS_PROD_REGION }}" >> $GITHUB_ENV
+          elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+            echo "Using development AWS credentials"
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_DEV_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+            echo "AWS_REGION=${{ secrets.AWS_DEV_REGION }}" >> $GITHUB_ENV
+          else
+            echo "Error: This workflow only supports deployments on dev and main branches."
+            exit 1
+
       - name: Create deployment package for Lambda function
         run: |
           cd app
           zip -r9 lambda.zip .
+
       - name: Determine function name
         id: determine_function_name
         run: |
@@ -43,6 +46,7 @@ jobs:
             exit 1
           fi
           echo "Function name set to: $FUNCTION_NAME"
+
       - name: Deploy Lambda function code
         run: |
           function_deploy() {
@@ -59,8 +63,10 @@ jobs:
             function_deploy   
           done
           echo "Deployment successful with Status: $STATUS!"
+
       - name: Wait for 10 seconds (Optional)
         run: sleep 10
+
       - name: Update function configuration with description
         run: |
           function_update() {
@@ -73,5 +79,3 @@ jobs:
           function_update   
         
           echo "Deployment successful with status: $STATUS"
-          
-
