@@ -8,7 +8,7 @@ on:
         required: true
 jobs:
   deploy:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -28,6 +28,7 @@ jobs:
           else
             echo "Error: This workflow only supports deployments on dev and main branches."
             exit 1
+          fi
 
       - name: Create deployment package for Lambda function
         run: |
@@ -54,13 +55,13 @@ jobs:
             --function-name "$FUNCTION_NAME" \
             --zip-file fileb://app/lambda.zip \
             --publish
-              STATUS=$?
-              echo "Status: $STATUS"
+            STATUS=$?
+            echo "Status: $STATUS"
           }
-          function_deploy        
+          function_deploy
           while [ $STATUS -ne 0 ]; do
             echo "failed once"
-            function_deploy   
+            function_deploy
           done
           echo "Deployment successful with Status: $STATUS!"
 
@@ -73,9 +74,9 @@ jobs:
             aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
             --description "${{ github.event.inputs.description }}"
-              STATUS=$?
-              echo "Status: $STATUS"
+            STATUS=$?
+            echo "Status: $STATUS"
           }
-          function_update   
-        
+          function_update
+
           echo "Deployment successful with status: $STATUS"
