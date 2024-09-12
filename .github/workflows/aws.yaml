@@ -89,10 +89,10 @@ jobs:
             ALIAS_NAME="latest"  # The alias name, replace 'latest' with your alias if different
             
             echo "Ensuring alias '$ALIAS_NAME' points to \$LATEST version"
-        
+           
             # Check if the alias exists
             ALIAS_EXISTS=$(aws lambda get-alias --function-name "$FUNCTION_NAME" --name "$ALIAS_NAME" --query 'Name' --output text || echo "Alias does not exist")
-        
+             echo "existing alias $ALIAS_EXISTS"
             if [ "$ALIAS_EXISTS" == "$ALIAS_NAME" ]; then
               # Update existing alias to point to $LATEST
               aws lambda update-alias \
